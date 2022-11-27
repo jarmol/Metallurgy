@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- THIS WORKS 22.11.2022 -->
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Embedded Elm-language Application, using Elm-architecture">
+    <meta name="keywords" content="Elm version 0.19.0, Sunposition calculation">
+    <meta name="author" content="Jarmo Lammi">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metallurgist's Calculator in Elm 0.19.1</title>
+
+    <style>
+      .result {
+        background-color: white;
+        font-size: 1.6em;
+        color: orange;
+      }
+    </style>
+</head>
+
+<body>
+    <div id="Main"></div>
+
+    <script src="elm.min.js"></script>
+
+    <script>
+        const myDiv = document.getElementById("Main");
+        const app = Elm.DelongNohara.init({ node: myDiv });
+    </script>
+</body>
+
+</html>
+
