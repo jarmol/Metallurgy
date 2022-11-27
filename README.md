@@ -16,3 +16,9 @@ The calculator is dynamic, i.e. it will recalculate the new results immediatelly
 3. Pitting corrosion resistance.
 
 The calculated results are shown under the table.
+
+You can run this program in your web browser even without Elm installed to your computer:
+
+Just save the files index.html and elm.min.js anywhere in the same folder in your computer.
+
+This should run as well in Mac, Windows and Linux.
