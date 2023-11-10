@@ -1,13 +1,19 @@
-module Delong2Nohara exposing (..)
+module DelongNohara exposing (main)
 
 import Browser
+import FormatNumber exposing (format)
+import FormatNumber.Locales exposing (Decimals(..), Locale, usLocale)
 import Html exposing (Html, a, div, h1, input, p, table, td, text, th, tr)
 import Html.Attributes as HA
 import Html.Events exposing (onInput)
-import FormatNumber exposing (format)
-import FormatNumber.Locales exposing (Decimals(..), Locale, usLocale)
 
 
+
+-- import Debug exposing (toString)
+-- source: https://github.com/jarmol/Metallurgy/blob/main/DelongNohara.elm
+
+
+main : Program () Model Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
@@ -81,6 +87,7 @@ update msg model =
             { model | xN = xN }
 
 
+headset : String -> Html msg
 headset hname =
     th
         [ HA.style "font-size" "14px"
@@ -90,33 +97,73 @@ headset hname =
         [ text hname ]
 
 
-xnam mod =
+xnam : List String
+xnam =
     [ "%C", "%Si", "%Mn", "%Cr", "%Ni", "%Mo", "%Ti", "%Cu", "%N" ]
 
 
+xmod :
+    { b
+        | xC : a
+        , xCr : a
+        , xCu : a
+        , xMn : a
+        , xMo : a
+        , xN : a
+        , xNi : a
+        , xSi : a
+        , xTi : a
+    }
+    -> List a
 xmod mod =
     [ mod.xC, mod.xSi, mod.xMn, mod.xCr, mod.xNi, mod.xMo, mod.xTi, mod.xCu, mod.xN ]
 
 
-xmsg mod =
+xmsg : List (String -> Msg)
+xmsg =
     [ MxC, MxSi, MxMn, MxCr, MxNi, MxMo, MxTi, MxCu, MxN ]
 
 
+trio :
+    { a
+        | xC : b
+        , xCr : b
+        , xCu : b
+        , xMn : b
+        , xMo : b
+        , xN : b
+        , xNi : b
+        , xSi : b
+        , xTi : b
+    }
+    -> List ( String, b, String -> Msg )
 trio mod =
-    zip3 (xnam mod) (xmod mod) (xmsg mod)
+    zip3 xnam (xmod mod) xmsg
 
 
+essential : String -> String -> (String -> msg) -> Html msg
 essential nam x ms =
-    let
-        s =
-            [ HA.style "padding-left" "10px"
-            , HA.style "font-size" "16px"
-            , HA.style "width" "60px"
-            ]
-    in
-    td s [ viewInput "string" nam x ms ]
+    td
+        [ HA.style "padding-left" "10px"
+        , HA.style "font-size" "16px"
+        , HA.style "width" "60px"
+        ]
+        [ viewInput "string" nam x ms ]
 
 
+valset :
+    { a
+        | xC : String
+        , xCr : String
+        , xCu : String
+        , xMn : String
+        , xMo : String
+        , xN : String
+        , xNi : String
+        , xSi : String
+        , xTi : String
+    }
+    -> List (Html Msg)
 valset mod =
     List.map (\( nc, cc, mc ) -> essential nc cc mc) (trio mod)
 
@@ -128,7 +175,7 @@ view model =
         , table [ HA.style "border" "2px solid black" ]
             [ tr []
                 (List.map headset
-                    (xnam model)
+                    xnam
                 )
             , tr [] (valset model)
             ]
@@ -137,9 +184,13 @@ view model =
         , p [] [ text ("Pitting Corrosion Resistance (PRE) = " ++ usDec3 (eqPittingResistance model)) ]
         , p [ HA.style "margin-top" "10em" ] []
         , p [] []
+
+        --        , p [] [text ("xmod model = " ++ Debug.toString (xmod model))]
+        --        , p [] [text ("xmsg = " ++ Debug.toString xmsg)]
+        --        , p [] [text ("trio model = " ++ Debug.toString (trio model))]
         , text "This page was built with "
         , a [ HA.href "https://elm-lang.org/" ] [ text "Elm programming language." ]
-        , p [] [ text "© 2022 J. Lammi" ]
+        , p [] [ text "© 2023 J. Lammi" ]
         ]
 
 
@@ -178,6 +229,7 @@ sumOfProducts alist blist =
 -}
 
 
+xval : String -> Float
 xval s =
     Maybe.withDefault 0.0 (String.toFloat s)
 
@@ -185,12 +237,15 @@ xval s =
 tempMd30 : Model -> Float
 tempMd30 mod =
     let
+        coefficients : List Float
         coefficients =
             [ 462.0, 9.2, 8.1, 13.7, 29.0, 18.5, 29.0, 462.0 ]
 
+        elements : List String
         elements =
             [ mod.xC, mod.xSi, mod.xMn, mod.xCr, mod.xNi, mod.xMo, mod.xCu, mod.xN ]
 
+        composition : List Float
         composition =
             List.map xval elements
     in
@@ -216,6 +271,7 @@ tempMd30 mod =
 fnA : Model -> Float
 fnA mod =
     let
+        crEkv : Float
         crEkv =
             xval mod.xCr
                 + 1.5
@@ -224,6 +280,7 @@ fnA mod =
                 + 2.0
                 * xval mod.xTi
 
+        niEkv : Float
         niEkv =
             xval mod.xNi
                 + 0.5
@@ -235,6 +292,7 @@ fnA mod =
                 + 0.5
                 * xval mod.xCu
 
+        preFNA : Float
         preFNA =
             3.34 * crEkv - 2.46 * niEkv - 28.6
     in
@@ -257,12 +315,15 @@ fnA mod =
 eqPittingResistance : Model -> Float
 eqPittingResistance mod =
     let
+        coefficients : List Float
         coefficients =
             [ 1.0, 3.3, 20.0 ]
 
+        elements : List String
         elements =
             [ mod.xCr, mod.xMo, mod.xN ]
 
+        composition : List Float
         composition =
             List.map xval elements
     in
@@ -273,6 +334,7 @@ eqPittingResistance mod =
 -- DECIMAL NUMBERS FORMAT
 
 
+sharesLocale : Locale
 sharesLocale =
     { usLocale
         | decimals = Exact 6
@@ -281,25 +343,13 @@ sharesLocale =
     }
 
 
+sharesLocaleUS : Locale
 sharesLocaleUS =
     { sharesLocale
         | decimals = Exact 3
     }
 
 
-sharesLocale3 =
-    { sharesLocale
-        | decimals = Exact 3
-    }
-
-
-cutDec6 x =
-    format sharesLocale x
-
-
-cutDec3 x =
-    format sharesLocale3 x
-
-
+usDec3 : Float -> String
 usDec3 x =
     format sharesLocaleUS x
