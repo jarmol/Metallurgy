@@ -7,11 +7,8 @@ import Html exposing (Html, a, div, h1, input, p, table, td, text, th, tr)
 import Html.Attributes as HA
 import Html.Events exposing (onInput)
 
-
-
--- import Debug exposing (toString)
 -- source: https://github.com/jarmol/Metallurgy/blob/main/DelongNohara.elm
-
+-- and live at https://ellie-app.com/ps5KwYHpDkpa1
 
 main : Program () Model Msg
 main =
@@ -102,19 +99,7 @@ xnam =
     [ "%C", "%Si", "%Mn", "%Cr", "%Ni", "%Mo", "%Ti", "%Cu", "%N" ]
 
 
-xmod :
-    { b
-        | xC : a
-        , xCr : a
-        , xCu : a
-        , xMn : a
-        , xMo : a
-        , xN : a
-        , xNi : a
-        , xSi : a
-        , xTi : a
-    }
-    -> List a
+xmod : Model -> List String
 xmod mod =
     [ mod.xC, mod.xSi, mod.xMn, mod.xCr, mod.xNi, mod.xMo, mod.xTi, mod.xCu, mod.xN ]
 
@@ -124,19 +109,8 @@ xmsg =
     [ MxC, MxSi, MxMn, MxCr, MxNi, MxMo, MxTi, MxCu, MxN ]
 
 
-trio :
-    { a
-        | xC : b
-        , xCr : b
-        , xCu : b
-        , xMn : b
-        , xMo : b
-        , xN : b
-        , xNi : b
-        , xSi : b
-        , xTi : b
-    }
-    -> List ( String, b, String -> Msg )
+
+trio : Model -> List ( String, String, String -> Msg )
 trio mod =
     zip3 xnam (xmod mod) xmsg
 
@@ -151,19 +125,8 @@ essential nam x ms =
         [ viewInput "string" nam x ms ]
 
 
-valset :
-    { a
-        | xC : String
-        , xCr : String
-        , xCu : String
-        , xMn : String
-        , xMo : String
-        , xN : String
-        , xNi : String
-        , xSi : String
-        , xTi : String
-    }
-    -> List (Html Msg)
+
+valset : Model  -> List (Html Msg)
 valset mod =
     List.map (\( nc, cc, mc ) -> essential nc cc mc) (trio mod)
 
@@ -183,11 +146,6 @@ view model =
         , p [] [ text ("Ferrite Number FN  = " ++ usDec3 (fnA model) ++ " (austenitic stainless)") ]
         , p [] [ text ("Pitting Corrosion Resistance (PRE) = " ++ usDec3 (eqPittingResistance model)) ]
         , p [ HA.style "margin-top" "10em" ] []
-        , p [] []
-
-        --        , p [] [text ("xmod model = " ++ Debug.toString (xmod model))]
-        --        , p [] [text ("xmsg = " ++ Debug.toString xmsg)]
-        --        , p [] [text ("trio model = " ++ Debug.toString (trio model))]
         , text "This page was built with "
         , a [ HA.href "https://elm-lang.org/" ] [ text "Elm programming language." ]
         , p [] [ text "© 2023 J. Lammi" ]
@@ -314,20 +272,7 @@ fnA mod =
 
 eqPittingResistance : Model -> Float
 eqPittingResistance mod =
-    let
-        coefficients : List Float
-        coefficients =
-            [ 1.0, 3.3, 20.0 ]
-
-        elements : List String
-        elements =
-            [ mod.xCr, mod.xMo, mod.xN ]
-
-        composition : List Float
-        composition =
-            List.map xval elements
-    in
-    sumOfProducts coefficients composition
+    sumOfProducts [ 1.0, 3.3, 20.0 ] (List.map xval [ mod.xCr, mod.xMo, mod.xN ])
 
 
 
@@ -353,3 +298,5 @@ sharesLocaleUS =
 usDec3 : Float -> String
 usDec3 x =
     format sharesLocaleUS x
+
+-- The original https://ellie-app.com/ps5KwYHpDkpa1
